@@ -1,0 +1,106 @@
+@startuml Snake_Game_Sequence
+!define FONT_NAME "Microsoft YaHei"
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+!theme spacelab
+
+title Snake Game - 游戏循环时序图
+
+participant "Player" as P
+participant "GameEngine" as GE
+participant "Snake" as S
+participant "Food" as F
+participant "Canvas" as C
+
+== 游戏初始化 ==
+P -> GE: 启动程序
+activate GE
+
+GE -> GE: 初始化Tkinter窗口
+GE -> GE: 创建Canvas和Label
+GE -> GE: 设置窗口居中
+
+GE -> S: __init__()
+activate S
+S -> S: 初始化蛇身坐标列表
+loop 创建初始蛇身
+    S -> C: create_rectangle()
+    C --> S: square_id
+end
+S --> GE: snake对象
+deactivate S
+
+GE -> F: __init__()
+activate F
+F -> F: 生成随机位置
+F -> C: create_oval()
+C --> F: food_id
+F --> GE: food对象
+deactivate F
+
+GE -> GE: 绑定键盘事件
+GE -> GE: 启动游戏循环
+
+== 主游戏循环 ==
+loop 游戏进行中
+    
+    == 用户输入处理 ==
+    P -> GE: 按下方向键
+    GE -> GE: change_direction(new_direction)
+    note right: 验证方向有效性，防止反向移动
+    
+    == 定时游戏更新 ==
+    GE -> GE: next_turn(snake, food)
+    activate GE
+    
+    ' 计算新位置
+    GE -> S: 获取头部坐标
+    S --> GE: head_x, head_y
+    GE -> GE: 根据direction计算新位置
+    
+    ' 更新蛇身
+    GE -> S: 在新位置插入头部
+    S -> C: create_rectangle(new_head)
+    C --> S: new_square_id
+    
+    ' 碰撞检测
+    GE -> F: 检查食物碰撞
+    activate F
+    alt 蛇头 == 食物位置
+        F --> GE: collision = true
+        GE -> GE: score += 1
+        GE -> GE: 更新分数显示
+        GE -> F: __init__() (重新生成食物)
+        F -> C: delete("food")
+        F -> C: create_oval(new_position)
+        note right: 蛇身保持，不移除尾部
+    else 未吃到食物
+        F --> GE: collision = false
+        GE -> S: 移除尾部
+        S -> C: delete(tail_square)
+        S -> S: 从coordinates移除尾部
+    end
+    deactivate F
+    
+    ' 游戏结束检测
+    GE -> GE: check_collisions(snake)
+    alt 发生碰撞
+        GE -> GE: game_over()
+        GE -> C: delete(ALL)
+        GE -> C: create_text("GAME OVER")
+        break
+    else 无碰撞
+        GE -> GE: window.after(SPEED, next_turn)
+        note right: 安排下一次循环
+    end
+    
+    deactivate GE
+    
+    == 画面渲染 ==
+    C -> P: 自动刷新显示更新
+    
+end
+
+deactivate GE
+
+@enduml

@@ -1,0 +1,79 @@
+@startuml Snake_Game_Class
+!define FONT_NAME "Microsoft YaHei"
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+!theme cerulean-outline
+
+title Snake Game - 类图
+
+class Snake {
+  +body_size: int
+  +coordinates: List[List[int]]
+  +squares: List[int]
+  --
+  +__init__(): void
+}
+
+class Food {
+  +coordinates: List[int]
+  --
+  +__init__(): void
+}
+
+class GameEngine <<Singleton>> {
+  +window: Tk
+  +canvas: Canvas
+  +label: Label
+  +score: int
+  +direction: str
+  --
+  +next_turn(snake: Snake, food: Food): void
+  +change_direction(new_direction: str): void
+  +check_collisions(snake: Snake): bool
+  +game_over(): void
+}
+
+class GameConfig <<Utility>> {
+  +GAME_WIDTH: int = 700
+  +GAME_HEIGHT: int = 700
+  +SPEED: int = 100
+  +SPACE_SIZE: int = 50
+  +BODY_PARTS: int = 3
+  +SNAKE_COLOR: str = "#00FF00"
+  +FOOD_COLOR: str = "#FF0000"
+  +BACKGROUND_COLOR: str = "#000000"
+}
+
+' 关系定义
+GameEngine *-- Snake : controls
+GameEngine *-- Food : manages
+GameEngine ..> GameConfig : uses
+
+' 依赖关系
+Snake ..> Canvas : draws on
+Food ..> Canvas : draws on
+GameEngine ..> Label : updates
+
+note top of Snake
+  蛇类核心功能：
+  • coordinates[0] 表示蛇头
+  • squares存储画布上的图形ID
+  • 支持移动和增长操作
+end note
+
+note right of Food
+  食物类特点：
+  • 随机生成位置（网格对齐）
+  • 避免与蛇身重叠
+  • 被吃掉后自动重新生成
+end note
+
+note bottom of GameEngine
+  游戏引擎职责：
+  • 管理游戏循环
+  • 处理用户输入
+  • 协调各组件交互
+  • 控制游戏状态
+end note
+
+@enduml

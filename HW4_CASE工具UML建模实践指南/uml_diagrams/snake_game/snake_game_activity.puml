@@ -1,0 +1,69 @@
+@startuml Snake_Game_Activity
+!define FONT_NAME "Microsoft YaHei"
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+!theme reddress-lightblue
+
+title Snake Game - 游戏流程活动图
+
+start
+
+:启动Snake Game程序;
+:初始化游戏窗口;
+:创建Canvas画布;
+:初始化Snake对象;
+:生成第一个Food对象;
+:设置键盘事件绑定;
+:显示游戏窗口;
+
+repeat
+  :等待游戏事件;
+  
+  split
+    :玩家按下方向键;
+    :验证新方向;
+    if (新方向与当前方向相反?) then (是)
+      :忽略输入;
+    else (否)
+      :更新移动方向;
+    endif
+  split again
+    :定时器触发;
+    :计算蛇头新位置;
+    :在新位置创建蛇头;
+    
+    if (蛇头与食物碰撞?) then (是)
+      :增加分数;
+      :更新分数显示;
+      :生成新食物;
+      :保持蛇身长度;
+    else (否)
+      :移除蛇尾;
+      :保持蛇身长度不变;
+    endif
+    
+    :更新画面显示;
+    
+    if (检测到碰撞?) then (是)
+      :显示"GAME OVER";
+      :清空画布;
+      break
+    else (否)
+      :继续游戏循环;
+    endif
+  end split
+
+repeat while (游戏继续?) is (是)
+->否;
+
+:游戏结束;
+:等待用户操作;
+
+if (用户选择重新开始?) then (是)
+  :重置游戏状态;
+  :重新开始;
+else (否)
+  stop
+endif
+
+@enduml

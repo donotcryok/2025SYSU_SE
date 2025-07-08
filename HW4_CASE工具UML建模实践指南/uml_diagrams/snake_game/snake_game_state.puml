@@ -1,0 +1,77 @@
+@startuml Snake_Game_State
+!define FONT_NAME "Microsoft YaHei"
+skinparam defaultFontName "Microsoft YaHei"
+skinparam defaultFontSize 12
+!theme superhero
+
+title Snake Game - 游戏状态图
+
+[*] --> Initializing
+
+state Initializing {
+  Initializing : 创建游戏窗口
+  Initializing : 初始化Snake和Food对象
+  Initializing : 设置事件绑定
+  Initializing : 居中显示窗口
+}
+
+state Playing {
+  [*] --> WaitingInput
+  
+  state WaitingInput {
+    WaitingInput : 等待用户输入或定时器
+    WaitingInput : 维持当前移动方向
+  }
+  
+  state ProcessingMove {
+    ProcessingMove : 计算新头部位置
+    ProcessingMove : 更新蛇身坐标
+    ProcessingMove : 创建新的图形元素
+  }
+  
+  state CollisionDetection {
+    CollisionDetection : 检查食物碰撞
+    CollisionDetection : 检查边界碰撞
+    CollisionDetection : 检查自身碰撞
+  }
+  
+  state UpdateDisplay {
+    UpdateDisplay : 更新Canvas显示
+    UpdateDisplay : 刷新分数标签
+    UpdateDisplay : 移除旧的图形元素
+  }
+  
+  WaitingInput --> ProcessingMove : 定时器触发或方向改变
+  ProcessingMove --> CollisionDetection : 移动完成
+  CollisionDetection --> UpdateDisplay : 无碰撞
+  UpdateDisplay --> WaitingInput : 显示更新完成
+  
+  CollisionDetection --> [*] : 检测到碰撞
+}
+
+state GameOver {
+  GameOver : 清空画布
+  GameOver : 显示"GAME OVER"文本
+  GameOver : 显示最终分数
+  GameOver : 等待用户操作
+}
+
+Initializing --> Playing : 初始化完成
+Playing --> GameOver : 碰撞发生
+GameOver --> Initializing : 重新启动
+GameOver --> [*] : 关闭程序
+
+note top of Playing
+  游戏主循环状态
+  包含输入处理、移动计算、
+  碰撞检测和显示更新
+end note
+
+note right of GameOver
+  游戏结束状态
+  用户可以选择：
+  • 重新开始
+  • 退出程序
+end note
+
+@enduml
